@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Quelle compétence je mobilise ? — Référentiel infirmier 2026</title>
+<style>
+  :root{
+    --bg:#f4f6f8;
+    --surface:#ffffff;
+    --ink:#1c2530;
+    --ink-soft:#5b6875;
+    --line:#e2e7ec;
+    --accent:#0f6e63;
+    --accent-ink:#ffffff;
+    --accent-soft:#e5f3f1;
+    --new-bg:#fff4e0;
+    --new-ink:#8a5a00;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(20,30,40,.06), 0 6px 20px rgba(20,30,40,.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:20px 16px 80px;}
+
+  header.top{
+    position:sticky; top:0; z-index:20;
+    background:linear-gradient(180deg,#0f6e63 0%, #0c5a51 100%);
+    color:#fff;
+    padding:18px 16px 20px;
+    box-shadow:0 2px 12px rgba(0,0,0,.12);
+  }
+  header.top .inner{max-width:900px;margin:0 auto;}
+  .header-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .header-row .logo{
+    flex:0 0 auto;
+    height:54px;
+    width:auto;
+    border-radius:8px;
+    background:#fff;
+    padding:5px 7px;
+  }
+  header.top h1{
+    margin:0 0 4px;
+    font-size:1.28rem;
+    font-weight:700;
+    letter-spacing:-.01em;
+  }
+  header.top p{
+    margin:0;
+    font-size:.86rem;
+    color:#d3ece7;
+  }
+
+  .search-box{
+    position:relative;
+    display:flex;
+    align-items:center;
+    background:#fff;
+    border-radius:12px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .search-box svg{flex:0 0 auto;margin-left:14px;color:#8a97a3;}
+  #search{
+    flex:1;
+    border:0;
+    outline:0;
+    padding:14px 12px;
+    font-size:1.05rem;
+    color:var(--ink);
+    background:transparent;
+    min-width:0;
+  }
+  #clearBtn{
+    display:none;
+    border:0;background:transparent;color:#8a97a3;cursor:pointer;
+    font-size:1.3rem;line-height:1;padding:8px 14px;
+  }
+  #clearBtn.show{display:block;}
+
+  .year-filters{
+    display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;
+  }
+  .chip{
+    border:1px solid rgba(255,255,255,.35);
+    background:rgba(255,255,255,.08);
+    color:#fff;
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:.82rem;
+    cursor:pointer;
+    user-select:none;
+    transition:.15s;
+  }
+  .chip.active{
+    background:#fff;
+    color:#0c5a51;
+    border-color:#fff;
+    font-weight:600;
+  }
+
+  main{padding-top:18px;}
+
+  .hint{
+    color:var(--ink-soft);
+    font-size:.92rem;
+    padding:4px 4px 14px;
+  }
+
+  .results-count{
+    font-size:.8rem;
+    color:var(--ink-soft);
+    margin:0 4px 10px;
+  }
+
+  .card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:14px 16px;
+    margin-bottom:10px;
+    cursor:pointer;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    border:1px solid transparent;
+    transition:transform .1s, box-shadow .1s;
+  }
+  .card:active{transform:scale(.99);}
+  .card:hover{border-color:var(--line);}
+
+  .badge{
+    flex:0 0 auto;
+    min-width:42px;
+    text-align:center;
+    padding:5px 8px;
+    border-radius:8px;
+    font-weight:700;
+    font-size:.82rem;
+    color:#fff;
+  }
+
+  .card-body{flex:1;min-width:0;}
+  .card-body .act-text{
+    font-size:.98rem;
+    line-height:1.38;
+    color:var(--ink);
+  }
+  .card-body .act-text mark{
+    background:#ffe28a;
+    color:inherit;
+    padding:0 1px;
+    border-radius:3px;
+  }
+  .card-body .comp-title{
+    font-size:.78rem;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+  .tag-new{
+    display:inline-block;
+    background:var(--new-bg);
+    color:var(--new-ink);
+    font-size:.68rem;
+    font-weight:700;
+    padding:2px 7px;
+    border-radius:6px;
+    margin-left:6px;
+    vertical-align:middle;
+  }
+  .tag-year{
+    display:inline-block;
+    background:#fde4e1;
+    color:#9c2b1f;
+    font-size:.68rem;
+    font-weight:700;
+    padding:2px 7px;
+    border-radius:6px;
+    margin-left:6px;
+    vertical-align:middle;
+  }
+
+  .empty-state{
+    text-align:center;
+    padding:40px 20px;
+    color:var(--ink-soft);
+  }
+  .empty-state .big{font-size:2.2rem;margin-bottom:6px;}
+
+  /* Browse grid */
+  .browse-title{
+    font-size:.95rem;
+    font-weight:700;
+    margin:22px 4px 10px;
+    color:var(--ink);
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:10px;
+  }
+  .comp-card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:14px 14px;
+    cursor:pointer;
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .comp-card .badge{min-width:38px;padding:5px 7px;font-size:.78rem;}
+  .comp-card .ct{font-size:.88rem;font-weight:600;line-height:1.25;}
+  .comp-card .tag-year{margin-left:0;margin-top:5px;}
+
+
+  /* Detail overlay */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(15,22,28,.45);
+    z-index:50;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+  }
+  .overlay.show{display:flex;}
+  .sheet{
+    background:var(--surface);
+    width:100%;
+    max-width:760px;
+    max-height:92vh;
+    overflow-y:auto;
+    border-radius:18px 18px 0 0;
+    padding:22px 20px 40px;
+    animation:slideup .18s ease-out;
+  }
+  @media(min-width:760px){
+    .overlay{align-items:center;}
+    .sheet{border-radius:18px;max-height:86vh;margin:20px;}
+  }
+  @keyframes slideup{from{transform:translateY(24px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+  .sheet-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+  .sheet-head .badge{font-size:.95rem;min-width:48px;padding:7px 10px;}
+  .sheet-head h2{margin:0;font-size:1.15rem;line-height:1.3;}
+  .close-x{
+    margin-left:auto;border:0;background:var(--bg);color:var(--ink-soft);
+    width:32px;height:32px;border-radius:50%;font-size:1.1rem;cursor:pointer;flex:0 0 auto;
+  }
+
+  .sheet .desc{font-size:.96rem;line-height:1.5;color:var(--ink);margin-bottom:14px;}
+  .sheet .explain{
+    background:var(--accent-soft);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:.9rem;
+    line-height:1.5;
+    color:#0c453e;
+    margin-bottom:16px;
+  }
+  .sheet .explain b{display:block;margin-bottom:4px;font-size:.8rem;text-transform:uppercase;letter-spacing:.03em;color:#0f6e63;}
+
+  .year-tabs{display:flex;gap:6px;margin-bottom:8px;}
+  .year-tab{
+    flex:1;text-align:center;padding:7px 6px;border-radius:8px;
+    background:var(--bg);font-size:.78rem;font-weight:600;color:var(--ink-soft);cursor:pointer;
+  }
+  .year-tab.active{background:var(--accent);color:#fff;}
+  .year-desc{
+    font-size:.86rem;color:var(--ink);line-height:1.45;
+    background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:18px;min-height:20px;
+  }
+
+  .sheet h3{font-size:.82rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);margin:0 0 8px;}
+  .act-list{list-style:none;margin:0 0 6px;padding:0;}
+  .act-list li{
+    font-size:.92rem;line-height:1.42;
+    padding:8px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .act-list li.heading{
+    font-weight:700;color:var(--accent);border-bottom:none;padding-bottom:2px;padding-top:14px;
+  }
+  .act-list li:first-child{padding-top:0;}
+  .notes{
+    margin-top:16px;font-size:.8rem;color:var(--ink-soft);
+    background:var(--bg);border-radius:10px;padding:10px 12px;
+  }
+  .notes p{margin:0 0 6px;}
+  .notes p:last-child{margin-bottom:0;}
+
+  footer{
+    text-align:center;color:var(--ink-soft);font-size:.75rem;padding:24px 16px 6px;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="inner">
+    <div class="header-row">
+      <img class="logo" src="data:image/png;base64,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" alt="Logo IFSI — Institut de Formation en Soins Infirmiers, Centre hospitalier Cholet">
+      <div>
+        <h1>Quelle compétence je mobilise&nbsp;?</h1>
+        <p>Tapez l'activité que vous réalisez en stage — Référentiel de formation infirmier 2026 (13 compétences)</p>
+      </div>
+    </div>
+    <div class="search-box">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search" type="text" placeholder="Ex : pansement, transmission, éducation thérapeutique…" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button id="clearBtn" aria-label="Effacer">✕</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <main id="main"></main>
+  <footer>D'après le livret de compétences / activités — référentiel infirmier 2026 · Outil de repérage non officiel</footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script id="data" type="application/json">[{"code": "C1", "title": "Élaborer le diagnostic infirmier", "description": "Élaborer le diagnostic infirmier pour une personne ou un groupe de personnes afin d'identifier les interventions adaptées à mettre en œuvre.", "explanation": "L’infirmier analyse les informations en mobilisant son jugement clinique afin d’identifier et comprendre les problèmes de santé. Il formule ensuite un diagnostic infirmier, correspondant à l’énoncé des problèmes réels ou potentiels relevant de son rôle propre.", "progress": {"1ère année": "Mettre en œuvre un jugement clinique dans le cadre de situations de soins simples ou stabilisées concernant une personne ou un groupe de personnes à tout âge de la vie", "2ème année": "Mettre en œuvre un jugement clinique dans le cadre de situations de soins simples ou complexes stabilisées concernant une personne ou un groupe de personnes à tout âge de la vie", "3ème année": "Mettre en œuvre un jugement clinique dans un environnement complexe et/ou spécifique pour une personne ou un groupe de personnes à tout âge de la vie"}, "activities": [{"text": "Détecter les signaux d'alerte ou les situations à risque (chute, dénutrition, déshydratation, détresse psychologique)", "isNew": false, "isHeading": false}, {"text": "Évaluation de l'autonomie et de la dépendance physique (mobilité, marche, risques de chutes et d'escarres)", "isNew": false, "isHeading": false}, {"text": "Évaluation de l'état nutritionnel et de l'hydratation", "isNew": false, "isHeading": false}, {"text": "Évaluation de l'observance et de la tolérance des traitements", "isNew": false, "isHeading": false}, {"text": "Évaluation de la dépendance avec la grille AGGIR", "isNew": false, "isHeading": false}, {"text": "Évaluation de la fonction urinaire à l'aide d'un appareil de mesure vésical", "isNew": false, "isHeading": false}, {"text": "Évaluation de la douleur", "isNew": false, "isHeading": false}, {"text": "Évaluation des fonctions cognitives, psychiques et de communication de la personne", "isNew": false, "isHeading": false}, {"text": "Évaluation en continu la profondeur de sédation, les signes de confort/inconfort", "isNew": true, "isHeading": false}, {"text": "Évaluation initiale en matière d'accompagnement au sevrage tabagique et des autres addictions (dépendance, leviers de motivation, freins, bénéfices attendus)", "isNew": true, "isHeading": false}, {"text": "Faire le lien entre les données collectées et les risques et/ou problèmes identifiés", "isNew": false, "isHeading": false}, {"text": "Faire un diagnostic éducatif d’une démarche d’éducation thérapeutique", "isNew": true, "isHeading": false}, {"text": "Formuler des diagnostics infirmiers", "isNew": false, "isHeading": false}, {"text": "Identification de toute modification de l'état de santé physique et psychique de la personne, incluant la lecture et le repérage d'anomalies des résultats d'examens biologiques pour information ou alerte du médecin, et adaptation du plan de soins infirmier", "isNew": true, "isHeading": false}, {"text": "Identification des exclusions, situations d'urgence ou complications nécessitant une orientation médicale ou spécialisée", "isNew": false, "isHeading": false}, {"text": "Identifier les ressources et les fragilités du patient (autonomie, entourage, compréhension, adhésion)", "isNew": false, "isHeading": false}, {"text": "Mener des entretiens d'accueil ou de recueil de données (habitudes de vie, antécédents, besoins, attentes, symptômes).", "isNew": false, "isHeading": false}, {"text": "Observation et caractérisation du lit de la plaie", "isNew": false, "isHeading": false}, {"text": "Évaluation initiale d’une plaie", "isNew": true, "isHeading": false}, {"text": "Prévention du risque ou de la récidive de chute", "isNew": false, "isHeading": false}, {"text": "Réalisation d'un examen clinique infirmier", "isNew": false, "isHeading": false}, {"text": "Réalisation d'entretiens infirmiers", "isNew": false, "isHeading": false}, {"text": "Réaliser un bilan de situation à domicile, intégrant l'environnement, la sécurité du logement, l'aidant", "isNew": false, "isHeading": false}, {"text": "Repérage de la iatrogénie", "isNew": false, "isHeading": false}, {"text": "Repérage des troubles alimentaires, de la dénutrition et de la malnutrition", "isNew": true, "isHeading": false}, {"text": "Repérage des troubles de la sexualité et évaluation des besoins en santé sexuelle, adaptés selon l'âge, les vulnérabilités ou les handicaps de la personne", "isNew": false, "isHeading": false}, {"text": "Repérage et évaluation de la souffrance psychique, du risque suicidaire, de la fragilité et des vulnérabilités psychosociales, et mise en place de stratégies de prévention", "isNew": true, "isHeading": false}, {"text": "Repérage et évaluation des besoins de la personne par l'utilisation d'outils et d'échelles standardisées", "isNew": false, "isHeading": false}, {"text": "Repérage précoce des signes de complications (ex: signes d'infection, risque d'escarres, déshydratation, trouble du comportement)", "isNew": false, "isHeading": false}, {"text": "Suivi des patients diabétiques sous pompe à insuline", "isNew": false, "isHeading": false}, {"text": "Surveillance des cathéters, sondes, drains et montages implantables posés par un médecin", "isNew": false, "isHeading": false}, {"text": "Surveillance des paramètres biologiques et cliniques de coagulation", "isNew": false, "isHeading": false}, {"text": "Surveillance des perfusions, scarifications et injections", "isNew": false, "isHeading": false}, {"text": "Surveillance des plaies, pansements et bandages", "isNew": false, "isHeading": false}, {"text": "Surveillance du retentissement somatique et psychologique (obésité, post-chirurgie bariatrique, oncologie)", "isNew": false, "isHeading": false}, {"text": "Surveillance et évaluation des engagements thérapeutiques associant l'équipe, la personne et son entourage", "isNew": false, "isHeading": false}, {"text": "Surveillance post-chirurgicale immédiate et dans le cadre d'un programme RAAC", "isNew": false, "isHeading": false}, {"text": "Vérification du statut vasculaire, du degré d'anticoagulation, des neuropathies sensitives et du statut vaccinal", "isNew": false, "isHeading": false}], "notes": []}, {"code": "C2", "title": "Définir les interventions adaptées", "description": "Définir les interventions à mener auprès d'une personne ou d'un groupe de personnes dans le respect de la déontologie et de l'éthique professionnelle dans le cadre d'une co-construction afin de répondre aux problématiques identifiées", "explanation": "Une fois le diagnostic posé, l'infirmier définit les interventions à mettre en œuvre. Cette compétence, c'est construire un plan de soins personnalisé, en accord avec le patient et si nécessaire son entourage. L'infirmier choisit les interventions adaptées — qu'il s'agisse de soins directs, d'éducation à la santé, d'orientation vers un autre professionnel, ou d'actions de prévention — tout en respectant les règles déontologiques et éthiques.", "progress": {"1ère année": "Identifier les interventions à mener auprès d'une personne ou un groupe de personnes à tout âge de la vie dans le cadre de situations de soins simples ou stabilisées", "2ème année": "Définir les interventions à mener auprès d'une personne ou d'un groupe de personnes à tout âge de la vie dans le cadre de situations de soins simples ou complexes stabilisées", "3ème année": "Définir les interventions à mener auprès d'une personne ou d'un groupe de personnes à tout âge de la vie dans un environnement complexe et/ou spécifique"}, "activities": [{"text": "Adaptation des soins, pour prioriser souhaits et confort de la personne", "isNew": true, "isHeading": false}, {"text": "Ajuster le plan de soins en fonction de l'évolution clinique du patient et ses besoins", "isNew": false, "isHeading": false}, {"text": "Construire le plan de soins en lien avec le médecin traitant et l’HAD si besoin", "isNew": false, "isHeading": false}, {"text": "Définir et hiérarchiser les interventions à mettre en œuvre en fonction des priorités", "isNew": false, "isHeading": false}, {"text": "Élaboration d'un projet de soins individuel dans le domaine des soins infirmiers", "isNew": false, "isHeading": false}, {"text": "Élaboration de programmes de soins d'hygiène et de confort adaptés, y compris en contexte palliatif", "isNew": false, "isHeading": false}, {"text": "Élaboration ou actualisation d’un plan de soins infirmiers personnalisé et argumenté", "isNew": false, "isHeading": false}, {"text": "Établir le plan de soins en tenant compte de l'urgence, de la faisabilité et des ressources disponibles", "isNew": false, "isHeading": false}, {"text": "Initier, ajuster et évaluer la profondeur de la sédation dans le cadre défini par la prescription, avec un médecin joignable et mobilisable", "isNew": true, "isHeading": false}, {"text": "Orienter la personne vers d'autres professionnels de santé ou du social quand la situation le nécessite", "isNew": false, "isHeading": false}, {"text": "Participation à l'élaboration et à la mise en œuvre des plans de prévention et de gestion de la douleur", "isNew": false, "isHeading": false}, {"text": "Proposer au patient un choix d'interventions en lui expliquant les différentes options", "isNew": false, "isHeading": false}, {"text": "Proposer des soins de support en oncologie, psychiatrie", "isNew": true, "isHeading": false}, {"text": "Proposer une médiation thérapeutique", "isNew": true, "isHeading": false}, {"text": "Proposition, mise en œuvre et adaptation d'un plan de prévention dans le domaine des soins infirmiers", "isNew": true, "isHeading": false}, {"text": "Réaliser des entretiens pour expliquer les soins et recueillir le consentement éclairé du patient avant chaque intervention", "isNew": false, "isHeading": false}, {"text": "Réaliser une consultation infirmière en autonomie", "isNew": true, "isHeading": false}], "notes": []}, {"code": "C3", "title": "Réaliser des soins sécurisés", "description": "Réaliser des soins à visée de dépistage, préventive, diagnostique, thérapeutique, palliative pour une personne ou un groupe de personnes dans le respect des règles QHSSE, des procédures et protocoles et en utilisant des données probantes", "explanation": "C’est concrètement réaliser les soins auprès du patient. Ces soins peuvent être curatifs (soigner une plaie, administrer un médicament), préventifs (surveiller pour éviter une complication), palliatifs ou diagnostiques (prélèvements, examens). Le nouveau référentiel intègre désormais la consultation infirmière, qui donne à l'infirmier un espace autonome pour évaluer et suivre un patient.", "progress": {"1ère année": "Réaliser des soins à tout âge de la vie, incluant les soins courants dits \"de la vie quotidienne\" pour une personne dans le cadre de situations de soins simples ou stabilisés", "2ème année": "Réaliser des soins incluant les soins courants pour un groupe de personnes et évaluer les projets de soins mis en œuvre dans le cadre de situations de soins simples ou complexes stabilisés", "3ème année": "Réaliser des soins dans un environnement complexe et/ou spécifique incluant l'évaluation des projets de soins mis en œuvre"}, "activities": [{"text": "Ablation de dispositif médical de réparation cutanée", "isNew": false, "isHeading": false}, {"text": "Ablation de drains pleuraux ou médiastinaux", "isNew": false, "isHeading": false}, {"text": "Accompagnement et soutien à la réalisation d'auto-soins", "isNew": false, "isHeading": false}, {"text": "Actions face à des situations d'urgence vitale", "isNew": false, "isHeading": false}, {"text": "Activités à visée psychiatrique (électroconvulsivothérapie, stimulation magnétique transcrânienne)", "isNew": false, "isHeading": false}, {"text": "Administration d'antalgiques de palier 1", "isNew": true, "isHeading": false}, {"text": "Administration de l'alimentation par sonde", "isNew": false, "isHeading": false}, {"text": "Administration de l'ensemble des vaccins du calendrier vaccinal aux personnes de 11 ans et plus, selon les recommandations en vigueur (hors vaccins vivants atténués chez les personnes immunodéprimées)", "isNew": true, "isHeading": false}, {"text": "Administration des vaccins contre la covid-19 aux personnes de 5 ans et plus", "isNew": true, "isHeading": false}, {"text": "Administration des vaccins contre la grippe saisonnière aux personnes de 11 ans et plus", "isNew": true, "isHeading": false}, {"text": "Administration en aérosols et pulvérisations de produits médicamenteux", "isNew": false, "isHeading": false}, {"text": "Administration médicamenteuse, avec préparation et dilution le cas échéant", "isNew": false, "isHeading": false}, {"text": "Appareillage et irrigation d'une plaie, d'une fistule ou d'une stomie", "isNew": false, "isHeading": false}, {"text": "Application d'anesthésiques locaux", "isNew": false, "isHeading": false}, {"text": "Application des protocoles d’hygiène (isolement, précautions standards, prévention des IAS)", "isNew": false, "isHeading": false}, {"text": "Ateliers socio-éducatifs et socio-thérapeutiques", "isNew": false, "isHeading": false}, {"text": "Bains d'oreilles et instillations médicamenteuses", "isNew": false, "isHeading": false}, {"text": "Branchement, surveillance et débranchement d'une dialyse ou d'un circuit d'échanges plasmatiques", "isNew": false, "isHeading": false}, {"text": "Changement de canule de trachéotomie (hors premier changement, effectué par un médecin)", "isNew": false, "isHeading": false}, {"text": "Changement de dispositif médical à ballonnet, hors premier remplacement de sonde jéjunale, de canule à ballonnet ou de sonde d'intubation", "isNew": false, "isHeading": false}, {"text": "Changement et retrait de sondes (oxygène, gastriques, vésicales, rectales) et de dispositifs non invasifs d'administration d'oxygène, hors sonde d'intubation", "isNew": false, "isHeading": false}, {"text": "Contrôle en télésurveillance de dispositifs implantables rythmologiques", "isNew": false, "isHeading": false}, {"text": "Cures de sevrage", "isNew": false, "isHeading": false}, {"text": "Délivrance de contraceptifs d'urgence (en établissements scolaires, universitaires, centres de santé sexuelle, CeGIDD, PASS)", "isNew": false, "isHeading": false}, {"text": "Enregistrement d'ECG de plus de 12 dérivations, d'électro-encéphalogrammes et de potentiels évoqués", "isNew": false, "isHeading": false}, {"text": "Enregistrement d'électro-encéphalogrammes avec épreuves d'effort ou médicaments modificateurs", "isNew": false, "isHeading": false}, {"text": "Entretien d’aide thérapeutique", "isNew": false, "isHeading": false}, {"text": "Entretiens d’éducation à la sortie", "isNew": false, "isHeading": false}, {"text": "Évaluation de la fonction urinaire à l'aide d'un appareil de mesure vésical", "isNew": true, "isHeading": false}, {"text": "Injections analgésiques dans des cathéters périduraux, intrathécaux ou proches d'un tronc/plexus nerveux, posés par un médecin ayant réalisé la première injection", "isNew": false, "isHeading": false}, {"text": "Injections et perfusions (transfusion)", "isNew": false, "isHeading": false}, {"text": "Injections, perfusions", "isNew": false, "isHeading": false}, {"text": "Installation et surveillance sous oxygénothérapie normobare et en caisson hyperbare", "isNew": false, "isHeading": false}, {"text": "Instillation intra-urétrale ; irrigation vaginale ; lavage de sinus par cathéter fixé par le médecin", "isNew": false, "isHeading": false}, {"text": "Lavements, extraction de fécalomes", "isNew": false, "isHeading": false}, {"text": "Lecture de l'intradermo-réaction pour le test tuberculinique", "isNew": true, "isHeading": false}, {"text": "Mesure de la pression veineuse centrale", "isNew": false, "isHeading": false}, {"text": "Mise en œuvre et adaptation de traitements antalgiques dans le cadre de protocoles préétablis", "isNew": false, "isHeading": false}, {"text": "Mise en œuvre, surveillance et évaluation des modalités de sédation profonde et continue", "isNew": true, "isHeading": false}, {"text": "Nettoyage, détersion mécanique et soins d'hygiène cutanée de la plaie", "isNew": false, "isHeading": false}, {"text": "Observer l’évolution de l’état de santé suite à une intervention ou un changement de traitement", "isNew": false, "isHeading": false}, {"text": "Participation aux techniques TENS et à l'analgésie par voie intrathécale", "isNew": false, "isHeading": false}, {"text": "Participation et assistance aux activités de médiation thérapeutique", "isNew": false, "isHeading": false}, {"text": "Pose de dispositifs d'immobilisation", "isNew": false, "isHeading": false}, {"text": "Pose de sondes vésicales, à oxygène, gastriques et rectales", "isNew": false, "isHeading": false}, {"text": "Pose et ablation de contention physique ou mécanique ponctuelle", "isNew": false, "isHeading": false}, {"text": "Pose et changement de dispositifs de compression ou de contention veineuse, sans modification de la force prescrite", "isNew": false, "isHeading": false}, {"text": "Pose et changement de support et de poche de colostomie", "isNew": false, "isHeading": false}, {"text": "Pose et retrait d'un cathéter court périphérique ou intra-osseux, ou d'une aiguille/trocart pour prélèvement ou perfusion", "isNew": false, "isHeading": false}, {"text": "Pose, changement et retrait de dispositifs transcutanés et surveillance de leurs effets", "isNew": false, "isHeading": false}, {"text": "Pose, renouvellement, surveillance et retrait d'un traitement par pression négative (TPN)", "isNew": false, "isHeading": false}, {"text": "Prélèvements de sang par ponction veineuse, capillaire, cathéter veineux, ou ponction artérielle pour gazométrie", "isNew": false, "isHeading": false}, {"text": "Prélèvements et collecte de sécrétions et d'excrétions ; recueil aseptique d'urines", "isNew": false, "isHeading": false}, {"text": "Traitement en autonomie de plaies chroniques et aiguës", "isNew": true, "isHeading": false}, {"text": "Préparation, utilisation et surveillance des appareils de circulation extracorporelle", "isNew": false, "isHeading": false}, {"text": "Prévention du risque ou de la récidive de chute", "isNew": false, "isHeading": false}, {"text": "Réalisation d'électrocardiogrammes standards de 12 dérivations en équipe pluri professionnelle, avec transmission systématique au médecin", "isNew": true, "isHeading": false}, {"text": "Réalisation et lecture de tests standardisés de dépistage des IST (VIH, hépatites, syphilis, chlamydia, gonocoque)", "isNew": true, "isHeading": false}, {"text": "Réalisation et lecture fonctionnelle d'un examen exploratoire à l'aide d'un mini-spiromètre", "isNew": true, "isHeading": false}, {"text": "Réalisation et mesure de l'index de pression systolique", "isNew": false, "isHeading": false}, {"text": "Réalisation, surveillance, renouvellement et retrait des pansements", "isNew": false, "isHeading": false}, {"text": "Réaliser une consultation infirmière autonome", "isNew": true, "isHeading": false}, {"text": "Recueil des données en matière de prévention, dépistage, surveillance et prise en charge de l'obésité : mesures de base (poids, taille, périmètre abdominal) et calcul de l'IMC ; recherche et évaluation des besoins de la personne", "isNew": true, "isHeading": false}, {"text": "Recueil des liquides biologiques (sang, sécrétions nasales, urines, salive) pour réalisation de tests à lecture instantanée, rapide et précoce (TROD) et lecture des données obtenues", "isNew": true, "isHeading": false}, {"text": "Retrait de cathéters centraux et intrathécaux", "isNew": false, "isHeading": false}, {"text": "Retrait de cathéters veineux périphériques longs et cathéters périnerveux", "isNew": false, "isHeading": false}, {"text": "Soins à visée palliative : gestion de la douleur, soins de bouche …", "isNew": false, "isHeading": false}, {"text": "Soins à visée préventive : vaccination, éducation à la santé …", "isNew": false, "isHeading": false}, {"text": "Soins d'hygiène et de confort", "isNew": false, "isHeading": false}, {"text": "Soins d'une personne en hypothermie ou en hyperthermie", "isNew": false, "isHeading": false}, {"text": "Soins d'une personne intubée, trachéotomisée ou trachéostomisée, et aspirations des sécrétions", "isNew": false, "isHeading": false}, {"text": "Soins de bouche avec produits médicamenteux", "isNew": false, "isHeading": false}, {"text": "Soins de la personne en assistance nutritive entérale ou parentérale", "isNew": false, "isHeading": false}, {"text": "Soins de la personne placée en milieu stérile", "isNew": false, "isHeading": false}, {"text": "Soins de la personne sous dialyse rénale ou péritonéale", "isNew": false, "isHeading": false}, {"text": "Soins de support en oncologie ; soins de support en psychiatrie", "isNew": true, "isHeading": false}, {"text": "Soins en situation d’urgence : vitale, troubles du comportement …", "isNew": false, "isHeading": false}, {"text": "Soins et surveillance en post-opératoire immédiat", "isNew": false, "isHeading": false}, {"text": "Soins et surveillance lors de transports sanitaires programmés ou d'aide médicale urgente (UMH-P, SMUR, SSSM, ambulance ARS)", "isNew": false, "isHeading": false}, {"text": "Soins relationnels et de confort pour préserver la dignité et l'autonomie résiduelle", "isNew": false, "isHeading": false}, {"text": "Soins, surveillance et évaluation d'une plaie, d'une escarre, d'un ulcère cutané, d'une fistule ou d'une stomie", "isNew": false, "isHeading": false}, {"text": "Surveillance de l'évolution de l'état de santé des personnes (fonctions vitales)", "isNew": false, "isHeading": false}, {"text": "Surveillance et soins de plaies post-opératoires", "isNew": false, "isHeading": false}, {"text": "Utilisation d'un défibrillateur manuel", "isNew": false, "isHeading": false}, {"text": "Utilisation de techniques et mise en œuvre d'entretiens individuels et de médiation à visée thérapeutique ou psychothérapique en équipe pluridisciplinaire", "isNew": false, "isHeading": false}, {"text": "Vérification du fonctionnement des appareils de ventilation assistée ou de monitorage (hors matériel lié à l'anesthésie)", "isNew": false, "isHeading": false}], "notes": []}, {"code": "C4", "title": "Prescrire des produits de santé", "description": "Prescrire des produits de santé (médicaments, dispositifs médicaux) et des examens complémentaires afin d'assurer un traitement et un suivi adapté à la situation clinique d'une personne dans le domaine des soins infirmiers", "explanation": "Nouveauté majeure du référentiel 2026, issue de la loi sur le métier infirmier de 2025 : l'infirmier peut désormais prescrire certains produits de santé (médicaments dans son champ de compétence, dispositifs médicaux) et des examens complémentaires. Cette compétence prépare les futurs infirmiers à ces nouvelles responsabilités cliniques, qui visent à améliorer l'accès aux soins.", "progress": {"1ère année": "Non abordée en 1ère année", "2ème année": "Identifier les principes et les éléments à préciser dans le cadre d'une prescription de produits de santé, de renouvellement et de demande d'examens complémentaires dans le respect du cadre réglementaire relatif à l'exercice infirmier", "3ème année": "Prescrire des produits de santé (médicaments, dispositifs médicaux) et des examens complémentaires pour une personne ou un groupe de personnes à tout âge de la vie"}, "activities": [{"text": "Adaptation de posologie selon la prescription initiale, dans la prise en charge de la douleur", "isNew": true, "isHeading": false}, {"text": "Identifier, au cours du soin, un besoin non couvert", "isNew": false, "isHeading": false}, {"text": "Orientation vers un autre professionnel de santé", "isNew": false, "isHeading": false}, {"text": "Prescription d'anesthésiques locaux (hors forme injectable)", "isNew": true, "isHeading": false}, {"text": "Prescription d'antalgiques de palier I (OMS), y compris en indication antipyrétique", "isNew": true, "isHeading": false}, {"text": "Prescription d'antiseptiques à large spectre (hors antibiotique), dans les 5 premiers jours d'une brûlure ou plaie traumatique souillée, hors pied diabétique", "isNew": true, "isHeading": false}, {"text": "Prescription d'arceaux de lit ; location de béquilles et cannes ; lève-malade", "isNew": true, "isHeading": false}, {"text": "Prescription d'ECBU avec antibiogramme si nécessaire", "isNew": true, "isHeading": false}, {"text": "Prescription d'orthèses élastiques de contention (renouvellement à l'identique)", "isNew": true, "isHeading": false}, {"text": "Prescription d'un bilan sanguin (cholestérol, triglycérides, glycémie à jeun) pour évaluer les facteurs de risque cardiovasculaire", "isNew": true, "isHeading": false}, {"text": "Prescription de collants, bas, chaussettes ou bandes de contention (renouvellement à l'identique de la force de compression)", "isNew": true, "isHeading": false}, {"text": "Prescription de contraceptifs d'urgence", "isNew": true, "isHeading": false}, {"text": "Prescription de créatininémie, dosage albuminurie/créatininurie et HbA1c pour les patients diabétiques connus (si non prescrits dans les 3 derniers mois)", "isNew": true, "isHeading": false}, {"text": "Prescription de dispositifs de perfusion à domicile (appareils, accessoires pour chambre implantable ou cathéter central, pieds à sérum)", "isNew": true, "isHeading": false}, {"text": "Prescription de dispositifs pour incontinence et appareil urogénital (étuis péniens, poches, sondes vésicales, dispositifs de stomie)", "isNew": true, "isHeading": false}, {"text": "Prescription de glycémie à jeun ou en urgence (déséquilibre du diabète, hypoglycémie)", "isNew": true, "isHeading": false}, {"text": "Prescription de l'ensemble des vaccins du calendrier vaccinal aux personnes de 11 ans et plus (hors vaccins vivants atténués chez les personnes immunodéprimées)", "isNew": true, "isHeading": false}, {"text": "Prescription de matériel de surveillance glycémique (renouvellement à l'identique) : lancettes, bandelettes, autopiqueurs, aiguilles, capteurs et lecteurs de glucose interstitiel", "isNew": true, "isHeading": false}, {"text": "Prescription de matériel pour nutrition entérale (renouvellement)", "isNew": true, "isHeading": false}, {"text": "Prescription de NFS, plaquettes et ionogramme sanguin, dans le cadre d'une pathologie connue ou de symptômes évocateurs", "isNew": true, "isHeading": false}, {"text": "Prescription de Nitrate d'argent à faible dosage en cas d'hyperbourgeonnement", "isNew": true, "isHeading": false}, {"text": "Prescription de pansements et matériel de pansement pour une durée initiale de 7 jours : pansements adhésifs, compresses stériles et non stériles, coton hydrophile, sparadraps, bandes, films semi-perméables, sets pour plaies, hydrocolloïdes, hydrocellulaires, alginates, hydrogels, pansements à l'argent, super-absorbants, produits hémostatiques, champs stériles, dispositifs de rapprochement cutané, et autres catégories assimilées", "isNew": true, "isHeading": false}, {"text": "Prescription de préservatifs", "isNew": true, "isHeading": false}, {"text": "Prescription de solutions stériles et produits antiseptiques ; sérum physiologique", "isNew": true, "isHeading": false}, {"text": "Prescription de sonde naso-gastrique ou naso-entérale pour nutrition à domicile", "isNew": true, "isHeading": false}, {"text": "Prescription de sprays protecteurs cutanés", "isNew": true, "isHeading": false}, {"text": "Prescription de substituts nicotiniques", "isNew": true, "isHeading": false}, {"text": "Prescription de supports de prévention/traitement d'escarre (matelas, sur-matelas, coussins)", "isNew": true, "isHeading": false}, {"text": "Prescription de tests de dépistage des IST (VIH, hépatites B et C, syphilis, chlamydia, gonocoque)", "isNew": true, "isHeading": false}, {"text": "Prescription des vaccins contre la covid-19 aux personnes de 5 ans et plus", "isNew": true, "isHeading": false}, {"text": "Prescription des vaccins contre la grippe saisonnière aux personnes de 11 ans et plus", "isNew": true, "isHeading": false}, {"text": "Prescription du dosage de bêta-HCG pour confirmation et datation de grossesse", "isNew": true, "isHeading": false}, {"text": "Rédaction d'une ordonnance infirmière sous supervision", "isNew": false, "isHeading": false}, {"text": "Réflexion sur la pertinence d'un examen (biologie, imagerie) : quel résultat attendu pour quel impact sur la prise en charge ?", "isNew": false, "isHeading": false}, {"text": "Renouvellement des contraceptifs oraux (moins d'un an, maximum 6 mois non renouvelable)", "isNew": true, "isHeading": false}, {"text": "Renouvellement du dosage de l'INR sous AVK (renouvellement rapproché en cas de déséquilibre constaté)", "isNew": true, "isHeading": false}, {"text": "Repérage les protocoles de soins infirmiers pré-établis où l'infirmier peut ajuster les doses (ex: titration antalgique, gestion de l'insuline).", "isNew": false, "isHeading": false}, {"text": "Sélectionner un dispositif médical (DM) adapté à une plaie ou à un soin spécifique en s'appuyant sur les données probantes", "isNew": false, "isHeading": false}], "notes": ["☝ Ordonnance médicale initiale de moins d'un an : l'infirmier ne peut renouveler qu'une prescription médicale de contraceptif oral datant de moins d'un an.", "Le renouvellement infirmier ne peut excéder 6 mois, et cette durée ne peut pas être reconduite une seconde fois par l'infirmier — au-delà, la patiente doit revoir un médecin ou une sage-femme.", "Certains contraceptifs oraux peuvent être exclus de ce droit de renouvellement s'ils figurent sur une liste fixée par arrêté du ministre chargé de la Santé (après avis de l'ANSM) — dans l'attente de cette liste spécifique, le principe reste large"]}, {"code": "C5", "title": "Promotion de la santé communautaire", "description": "Concevoir et conduire une démarche de promotion de la santé, d'éducation à la santé, en santé communautaire et populationnelle afin de répondre aux besoins de santé publique", "explanation": "L'infirmier est aussi un acteur de santé publique. Cette compétence concerne les actions menées non pas pour un seul patient, mais pour des groupes ou des communautés. Il s'agit de concevoir et conduire des projets qui favorisent la santé d'une population : ateliers de prévention en milieu scolaire, campagnes de dépistage.", "progress": {"1ère année": "Identifier les priorités de santé publique, les étapes et les méthodes de mise en œuvre d'une démarche de promotion de la santé, d'éducation à la santé, en santé communautaire et populationnelle", "2ème année": "Concevoir et conduire une démarche de promotion de la santé, d'éducation à la santé, en santé communautaire et populationnelle afin de répondre aux besoins de santé publique", "3ème année": "Concevoir et conduire une démarche de promotion de la santé, d'éducation à la santé, en santé communautaire et populationnelle afin de répondre aux besoins de santé publique"}, "activities": [{"text": "Action de dépistage collectif (diabète, hypertension, VIH, vaccination, dépistage cancer…) en service ou lors d'événements de santé publique : octobre rose par exemple", "isNew": false, "isHeading": false}, {"text": "Analyser les besoins de santé d'une population à partir de données épidémiologiques locales", "isNew": false, "isHeading": false}, {"text": "Animer des séances d'information ou de sensibilisation sur des thèmes de santé publique (ex : tabac, addictions, nutrition, sommeil).", "isNew": false, "isHeading": false}, {"text": "Concevoir des supports pédagogiques adaptés (fiches conseils, outils visuels …) pour aider les patients à mieux comprendre leur pathologie et leur traitement ou les facteurs associés", "isNew": false, "isHeading": false}, {"text": "Concevoir et animer une séance d’éducation thérapeutique à la santé pour un groupe de patients d’un même service : sevrage tabagique post infarctus, alimentation patient diabétique, prévention des chutes des personnes âgées", "isNew": false, "isHeading": false}, {"text": "Concevoir une séance d'information ou de prévention pour un groupe de patients ou de résidents (tabac, alcool, alimentation, sédentarité…)", "isNew": false, "isHeading": false}, {"text": "Evaluer l’action de dépistage menée (recueil ressenti participants, mesure d’un indicateur simple)", "isNew": false, "isHeading": false}, {"text": "Mener des séances d'information et de prévention", "isNew": false, "isHeading": false}, {"text": "Participer à des programmes d’aide aux aidants", "isNew": false, "isHeading": false}, {"text": "Participer à la prévention des maladies chroniques et de leurs complications via le sevrage tabagique", "isNew": true, "isHeading": false}, {"text": "Participer à une vaccination comme levier de prévention en période de crise sanitaire", "isNew": true, "isHeading": false}, {"text": "Réaliser un dépistage des IST", "isNew": true, "isHeading": false}, {"text": "Réaliser une intervention de prévention en milieu scolaire, en EHPAD ou lors d'une consultation infirmière de groupe", "isNew": false, "isHeading": false}], "notes": []}, {"code": "C6", "title": "Éducation thérapeutique et consultation infirmière", "description": "Concevoir, conduire et co-construire une démarche d'éducation thérapeutique, de prévention, de dépistage et de repérage auprès d'une personne notamment dans le cadre d'une consultation infirmière", "explanation": "Cette compétence est centrée sur la personne. L'infirmier accompagne un patient atteint d'une maladie chronique pour qu'il devienne acteur de sa propre santé. L'éducation thérapeutique du patient (ETP) consiste à lui apprendre à vivre avec sa maladie, à gérer son traitement, à reconnaître les signes d'alerte. C'est une approche bienveillante, basée sur l'écoute et la co-construction, pas sur la simple transmission d'informations.", "progress": {"1ère année": "Identifier les étapes et l'organisation d'une démarche d'éducation thérapeutique, de prévention, de dépistage et de repérage auprès d'une personne notamment dans le cadre d'une consultation infirmière", "2ème année": "Concevoir et conduire une démarche d'éducation thérapeutique, de prévention, de dépistage et de repérage en intégrant les politiques de santé et les priorités de santé publique", "3ème année": "Concevoir et conduire une démarche d'éducation thérapeutique, de prévention, de dépistage et de repérage en intégrant les politiques de santé et les priorités de santé publique"}, "activities": [{"text": "Education thérapeutique :", "isNew": false, "isHeading": true}, {"text": "Apprentissage et soutien motivationnel pour l'adhésion aux soins, l'observance, l'auto-soin et le bon usage des dispositifs médicaux", "isNew": false, "isHeading": false}, {"text": "Ateliers individuels ou de groupe à visée socio-éducative et socio-thérapeutique", "isNew": false, "isHeading": false}, {"text": "Entretien motivationnel et d'accompagnement, notamment en santé sexuelle et sevrage tabagique", "isNew": true, "isHeading": false}, {"text": "Évaluation de l'état nutritionnel et de l'hydratation, éducation et accompagnement selon les besoins nutritionnels", "isNew": false, "isHeading": false}, {"text": "Initiation et mise en œuvre de la démarche d'éducation thérapeutique (diagnostic éducatif, programme personnalisé, séances, évaluation), y compris en santé mentale et psychiatrie", "isNew": true, "isHeading": false}, {"text": "L'infirmier est habilité à conduire, en autonomie, des consultations infirmières dans les domaines d'activité et de compétence définis par le code de la santé publique", "isNew": true, "isHeading": false}, {"text": "Mener un bilan éducatif initial : identifier les représentations du patient sur sa maladie, ses freins, ses ressources et son projet de vie.", "isNew": false, "isHeading": false}, {"text": "Repérage (signes ou facteurs de risque au cours d’un soin) :", "isNew": false, "isHeading": true}, {"text": "Orienter le patient vers les ressources adaptées (réseaux de soins, associations, structures spécialisées).", "isNew": false, "isHeading": false}, {"text": "Prévention, dépistage, orientation et conseils relatifs aux IST, information sur la PrEP et la Doxy-PEP", "isNew": true, "isHeading": false}, {"text": "Repérage, évaluation, accompagnement et orientation en matière d'addictions", "isNew": true, "isHeading": false}, {"text": "Repérer des signes de mal-être ou risque suicidaire au cours d'un entretien avec appui d'un professionnel référent ou formé, sans agir seul", "isNew": false, "isHeading": false}, {"text": "Démarche transversale :", "isNew": false, "isHeading": true}, {"text": "Évaluer l'intervention menée (atteinte des objectifs, ressenti de la personne, ajustements à prévoir)", "isNew": false, "isHeading": false}, {"text": "Préparer et mener des entretiens de suivi en tenant compte du projet de vie et des priorités exprimées par la personne (ex : suivi de pathologie chronique, éducation à la sortie, observance thérapeutique).", "isNew": false, "isHeading": false}], "notes": []}, {"code": "C7", "title": "Actions environnementales et écoresponsables", "description": "Concevoir et conduire une démarche et des actions de communication et d'éducation des communautés et des organisations sur les enjeux environnementaux, les pratiques et gestes durables et écoresponsables", "explanation": "Compétence nouvelle dans le référentiel 2026, en phase avec les enjeux actuels. L'infirmier doit désormais intégrer la dimension environnementale dans sa pratique : réduire les déchets, limiter les produits polluants, adopter des gestes éco-responsables dans les soins. Il devient aussi un acteur de sensibilisation auprès des patients et des équipes sur les liens entre environnement et santé.", "progress": {"1ère année": "Analyser des données issues des recommandations et des productions en lien avec la gestion des risques environnementaux et les enjeux environnementaux, les pratiques et les gestes durables et écoresponsables", "2ème année": "Conduire une démarche et des actions de communication et d'éducation des communautés et des organisations sur les enjeux environnementaux, les pratiques et gestes durables et écoresponsables", "3ème année": "Concevoir et conduire une démarche et des actions de communication et d'éducation des communautés et des organisations sur les enjeux environnementaux, les pratiques et gestes durables et écoresponsables"}, "activities": [{"text": "Geste individuel dans le soin :", "isNew": false, "isHeading": true}, {"text": "Identifier et appliquer les bonnes pratiques d'éco-soins dans le service (tri des déchets, gestion des DASRI, lutte contre le gaspillage de matériel)", "isNew": false, "isHeading": false}, {"text": "Proposer des alternatives éco-responsables argumentées dans les soins quand elles existent (réduction du plastique par ex.)", "isNew": false, "isHeading": false}, {"text": "Réaliser une analyse critique d’une situation de soins sous l’angle du développement durable en identifiant les tensions éventuelles avec la sécurité ou l’hygiène des soins", "isNew": false, "isHeading": false}, {"text": "Sensibilisation d’un patient, d’un entourage ou d’un groupe :", "isNew": false, "isHeading": true}, {"text": "Concevoir un support de sensibilisation environnementale adapté à un public donné (fiche conseil, affichage, temps d’échange en groupe)", "isNew": false, "isHeading": false}, {"text": "Évaluer si l’action de mobilisation menée a été comprise ou a fait évoluer une pratique", "isNew": false, "isHeading": false}, {"text": "Sensibiliser les patients aux liens entre environnement et santé (pollution, perturbateurs endocriniens, alimentation, qualité de l’air intérieur…)", "isNew": false, "isHeading": false}, {"text": "Contribution à une démarche organisationnelle :", "isNew": false, "isHeading": true}, {"text": "Contribuer à sensibiliser l’équipe à un geste ou une pratique écoresponsable observée en stage", "isNew": false, "isHeading": false}, {"text": "Participer à un groupe de travail, une charte ou une démarche de développement durable au sein d’une structure de soins (comité RSE, référent éco-soins…)", "isNew": false, "isHeading": false}, {"text": "Repérer et faire remonter à l’équipe ou au cadre une piste d’amélioration environnementale identifiée dans l’organisation du service", "isNew": false, "isHeading": false}], "notes": []}, {"code": "C8", "title": "Gérer une structure d'exercice", "description": "Gérer ou organiser une structure d'exercice individuel ou collectif en optimisant les ressources", "explanation": "L'infirmier est aussi gestionnaire de son espace de travail. Cette compétence concerne la capacité à organiser une structure de soins (cabinet libéral, service, unité) : gérer le matériel, les stocks, les ressources humaines au quotidien, optimiser les flux de patients.", "progress": {"1ère année": "Non abordée en 1ère année", "2ème année": "Identifier les aspects réglementaires relatifs à la création et au fonctionnement d'une structure ou d'un cabinet et assurer le suivi des stocks, la gestion des déchets et l'archivage des données", "3ème année": "Proposer la gestion et l'organisation d'une structure d'exercice individuel ou collectif en optimisant les ressources dans une démarche écoresponsable"}, "activities": [{"text": "Coordination des intervenants : Orienter les aides-soignants, kinésithérapeutes ou diététiciens pour optimiser les allées et venues dans les chambres", "isNew": false, "isHeading": false}, {"text": "En libéral : gérer le cabinet (facturation, stocks, partenariats, agenda)", "isNew": false, "isHeading": false}, {"text": "Gestion des flux de patients : Anticiper les sorties (préparer les documents de sortie, contacter les services de suite ou l'HAD) pour fluidifier le parcours patient et libérer les lits.", "isNew": false, "isHeading": false}, {"text": "Maintenance du matériel biomédical : Vérifier le bon fonctionnement des dispositifs (lecteurs de glycémie, pousse-seringues, moniteurs) et signaler les pannes pour éviter l'immobilisation des ressources.", "isNew": false, "isHeading": false}, {"text": "Organisation et gestion des ressources d'une structure/d'un cabinet", "isNew": false, "isHeading": false}, {"text": "Organiser l'espace de soins pour garantir sécurité et efficacité (chariot de soins, salle de préparation)", "isNew": false, "isHeading": false}, {"text": "Participer à la gestion des stocks et du matériel (inventaire, commandes, péremptions, traçabilité)", "isNew": false, "isHeading": false}, {"text": "Participer au réapprovisionnement du chariot d'urgence", "isNew": false, "isHeading": false}, {"text": "Suivre les indicateurs de qualité du service (taux d'escarres, infections, chutes) et proposer des actions correctives", "isNew": false, "isHeading": false}], "notes": []}, {"code": "C9", "title": "Organiser les activités de soins", "description": "Organiser les activités de soins en transmettant et en recevant des informations et données en lien avec la personne en utilisant les outils numériques, aux membres d'une équipe pluri-professionnelle dans un but de collaboration et de continuité de soins", "explanation": "Cette compétence est au cœur du travail infirmier en équipe. L'infirmier doit savoir transmettre les informations essentielles, utiliser les outils numériques de santé (dossier patient informatisé, messagerie sécurisée), et assurer la continuité des soins entre les différents intervenants. Il est le pivot de la coordination entre les membres de l'équipe soignante, le médecin, la famille et les autres professionnels du parcours de santé.", "progress": {"1ère année": "Organiser son activité en prenant en compte le travail en équipe, son propre champ d'intervention au regard des fonctions et activités de chaque professionnel afin de développer la coopération au sein de l'équipe pluri-professionnelle", "2ème année": "Organiser les activités de soins en transmettant et en recevant des informations et données en lien avec la personne en utilisant les outils numériques, aux membres d'une équipe pluri-professionnelle dans un but de collaboration et de continuité de soins", "3ème année": "Organiser les activités de soins en transmettant et en recevant des informations et données en lien avec la personne, en s'adaptant au contexte et situations d'urgence"}, "activities": [{"text": "En EHPAD : coordonner le plan d'accompagnement personnalisé (PAP) avec l'ensemble des intervenants", "isNew": false, "isHeading": false}, {"text": "Assurer la liaison avec les professionnels de ville lors d'une sortie d'hospitalisation (courrier infirmier, appel)", "isNew": false, "isHeading": false}, {"text": "Collaboration avec patients experts, médiateurs en santé, pair-aidants", "isNew": false, "isHeading": false}, {"text": "Collaboration et coordination des soins, dont le retour à domicile", "isNew": false, "isHeading": false}, {"text": "Collaboration pour la mise en œuvre de soins multidisciplinaires, notamment la récupération améliorée après chirurgie (RAAC)", "isNew": false, "isHeading": false}, {"text": "Contribuer à la coordination et animation des activités, des parcours de soins/des parcours de santé, dans les différents milieux/lieux de vie et de soins", "isNew": false, "isHeading": false}, {"text": "Coordonner les interventions des différents professionnels autour du patient (kinésithérapeute, ergothérapeute, diététicien, assistante sociale…)", "isNew": false, "isHeading": false}, {"text": "Élaboration de notes cliniques et de fiches de liaison à destination d'un autre professionnel de santé", "isNew": false, "isHeading": false}, {"text": "Initiation et contribution à une concertation pluridisciplinaire", "isNew": false, "isHeading": false}, {"text": "Inscription dans le carnet de santé/vaccination et le dossier médical partagé (ou le dossier infirmier) des informations de vaccination, avec délivrance d'une attestation et transmission au médecin traitant", "isNew": true, "isHeading": false}, {"text": "La consultation est reportée dans le dossier du patient", "isNew": true, "isHeading": false}, {"text": "Orientation après un entretien d'accueil", "isNew": false, "isHeading": false}, {"text": "Orientation de la personne dans son parcours de soins, triage infirmier et traçabilité", "isNew": false, "isHeading": false}, {"text": "Participation aux transmissions orales et aux réunions d'équipe", "isNew": false, "isHeading": false}, {"text": "Préparer et participer à une réunion de concertation pluri professionnelle (RCP, synthèse en EHPAD)", "isNew": false, "isHeading": false}, {"text": "Rédaction et mise à jour du dossier patient (transmissions ciblées, observations cliniques)", "isNew": false, "isHeading": false}, {"text": "Rédiger les documents de liaison (compte-rendu de consultation infirmière, bilan de sortie)", "isNew": false, "isHeading": false}, {"text": "Transmettre les informations nécessaires aux autres membres de l'équipe pour assurer la continuité et la cohérence des soins", "isNew": false, "isHeading": false}, {"text": "Transmission et évaluation du projet de soins infirmiers", "isNew": false, "isHeading": false}, {"text": "Utiliser le dossier patient informatisé (DPI) pour saisir les données cliniques et les actes de soins", "isNew": false, "isHeading": false}, {"text": "Utiliser les outils de coordination des parcours (plan personnalisé de santé, plan d'aide, messagerie sécurisée de santé)", "isNew": false, "isHeading": false}], "notes": []}, {"code": "C10", "title": "Accompagner pairs et apprenants", "description": "Accompagner les pairs, les apprenants et les autres professionnels afin de permettre leur accueil, leur formation et le développement de leurs compétences, dans le respect des personnes en tenant compte de leurs éventuels besoins spécifiques", "explanation": "Accueillir un étudiant en stage, c'est exercer la compétence 10. L'infirmier est chargé de créer un environnement favorable à l'apprentissage, d'expliquer, de montrer, de questionner l'étudiant, et d'évaluer sa progression.", "progress": {"1ère année": "Identifier les étapes, techniques et méthodes permettant le développement et l'évaluation des compétences", "2ème année": "Identifier les étapes, techniques et méthodes permettant le développement et l'évaluation des compétences des pairs, des apprenants et des autres professionnels et réaliser l'accueil et l'intégration des nouveaux apprenants", "3ème année": "Réaliser l'accueil, l'intégration, l'accompagnement et l'évaluation des pairs, des apprenants et des autres professionnels afin de développer l'acquisition de leurs compétences"}, "activities": [{"text": "Accueil de stagiaire ou de nouveau personnel", "isNew": false, "isHeading": false}, {"text": "Accueil de stagiaire et intégration : Présenter les locaux, le fonctionnement du service, et les règles d'hygiène/sécurité aux nouveaux étudiants ou aux stagiaires aides-soignants.", "isNew": false, "isHeading": false}, {"text": "Adaptation pédagogique : Identifier que chaque apprenant n'apprend pas à la même vitesse ou de la même manière (visuel, manuel, théorique) et ajuster les explications en conséquence.", "isNew": false, "isHeading": false}, {"text": "Démonstration technique : Expliquer une procédure de soin (ex: préparation d'une perfusion) à un pair, en justifiant chaque geste par des connaissances scientifiques (règles d'asepsie, pharmacologie).", "isNew": false, "isHeading": false}, {"text": "Identifier le niveau de compétences et les objectifs de stage de l'étudiant", "isNew": false, "isHeading": false}, {"text": "Partage d'informations cliniques : Lors des transmissions, mettre en avant des éléments cliniques spécifiques pour former indirectement les autres (ex: partager une lecture récente sur une nouvelle recommandation de pansement).", "isNew": false, "isHeading": false}, {"text": "Transmission du savoir-faire aux aides-soignants : Expliquer l'intérêt clinique d'une prescription médicale ou le rôle d'un paramètre surveillé", "isNew": false, "isHeading": false}], "notes": []}, {"code": "C11", "title": "Amélioration continue des soins", "description": "Mettre en œuvre le processus d'amélioration continue des soins et de sa pratique professionnelle dans le cadre de ses activités", "explanation": "Un infirmier qui améliore ses pratiques, c'est un professionnel qui ne se contente pas de faire comme d'habitude. Cette compétence, c'est analyser ses pratiques professionnelles, à les confronter aux données scientifiques actuelles, et à identifier des axes d’amélioration. C’est aussi participer activement à la démarche qualité et de gestion des risques de son établissement, notamment par le signalement d’événements indésirables.", "progress": {"1ère année": "Identifier et mettre en œuvre les méthodologies et outils d'évaluation adaptés à l'analyse de situations, et mettre en œuvre les principes et règles de vigilance dans toute activité", "2ème année": "Proposer une démarche d'amélioration continue de la qualité dans son activité", "3ème année": "Mettre en œuvre le processus d'amélioration continue des soins et de sa pratique professionnelle dans le cadre de ses activités"}, "activities": [{"text": "Évaluer la satisfaction et l’expérience du patient : Recueillir, avec tact et dans le respect des règles, le ressenti et l’évaluation du patient sur sa prise en soins.", "isNew": false, "isHeading": false}, {"text": "Identifier une problématique dans sa pratique ou dans l'organisation des soins et la formaliser comme sujet d'amélioration", "isNew": false, "isHeading": false}, {"text": "Lorsqu'une question surgit, aller chercher des articles, des recommandations de bonnes pratiques", "isNew": false, "isHeading": false}, {"text": "Participation aux démarches qualité : Participer aux audits ponctuels (ex: audit hygiène des mains, audits de tenue du dossier patient).", "isNew": false, "isHeading": false}, {"text": "Participer à une démarche d'audit clinique ou à une évaluation des pratiques professionnelles (EPP)", "isNew": false, "isHeading": false}, {"text": "Participer au débriefing après des situations complexes", "isNew": false, "isHeading": false}, {"text": "Réaliser une analyse de cas clinique ou de situation professionnelle et la présenter à l'équipe", "isNew": false, "isHeading": false}, {"text": "Signaler un événement indésirable associé aux soins (EIAS) via la procédure de déclaration interne", "isNew": false, "isHeading": false}], "notes": []}, {"code": "C12", "title": "Analyser des données scientifiques", "description": "Analyser des données scientifiques et professionnelles afin d'optimiser sa pratique et son expertise professionnelle, la qualité et la sécurité des activités réalisées", "explanation": "Les soins infirmiers reposent sur des preuves scientifiques et professionnelles, pas seulement sur l'habitude ou la tradition. Cette compétence consiste à savoir chercher des informations fiables dans la littérature scientifique, à évaluer leur niveau de preuve, et à les confronter aux données issues de sa pratique quotidienne. C'est le fondement d'une pratique infirmière fondée sur les preuves (evidence-based nursing).", "progress": {"1ère année": "Rechercher et sélectionner des publications scientifiques et professionnelles au moyen des différentes ressources documentaires nationales et internationales", "2ème année": "Rechercher et traiter des données contenues dans les publications scientifiques et professionnelles et les différentes ressources documentaires nationales et internationales (lecture critique)", "3ème année": "Analyser des données scientifiques et professionnelles dont rechercher, analyser, synthétiser et utiliser les données probantes nécessaires à leur pratique"}, "activities": [{"text": "Effectuer une recherche documentaire sur une question clinique précise en lien avec l’activité du service (bases de données PubMed, HAS, BDSP….)", "isNew": false, "isHeading": false}, {"text": "Participer (via une démarche qualité) au suivi des taux d'infections nosocomiales ou d'escarres au sein du service pour comprendre quels leviers (hygiène, prévention) ont fonctionné.", "isNew": false, "isHeading": false}, {"text": "Présenter une revue de littérature courte à l'équipe sur une pratique ou thématique spécifique du service Par exemple, comparer les recommandations et protocoles de pansements de plaie selon les derniers consensus de sociétés savantes pour comprendre dans quelle situation on utilise un pansement plutôt qu’un autre et pourquoi", "isNew": false, "isHeading": false}, {"text": "Réaliser une analyse critique d’un article scientifique", "isNew": false, "isHeading": false}, {"text": "Rechercher et lire des recommandations de bonne pratique (HAS, SFAR, SFMU, sociétés savantes …) sur un sujet clinique", "isNew": false, "isHeading": false}], "notes": ["Exemples de thématiques de recherche en stage :", "Soins en phase aiguë :", "Prévention des escarres en décubitus prolongé (soins critiques)", "Gestion non pharmacologique de la douleur post-opératoire", "Prévention des infections liées aux dispositifs invasifs", "Repérage précoce du sepsis par l'infirmier", "Mobilisation précoce et sevrage ventilatoire en réanimation", "Situations stabilisées :", "Adhésion thérapeutique du patient chronique", "Prévention des chutes de la personne âgée à domicile", "Télésanté et suivi des plaies chroniques à domicile", "Coordination du maintien à domicile en soins palliatifs", "Éducation thérapeutique de l'aidant familial", "Réhabilitation post-AVC et autonomie fonctionnelle", "Prévention de la dénutrition en rééducation prolongée", "Éducation à l'auto sondage / autogestion de stomie", "Stimulation cognitive et récupération fonctionnelle", "EHPAD :", "Dénutrition de la personne âgée", "Alternatives à la contention face aux troubles du comportement", "Prévention des chutes en EHPAD", "Repérage de la douleur chez le résident non communiquant", "Iatrogénie médicamenteuse chez le sujet âgé polymédiqué", "Pédiatrie et santé de l’enfant :", "Gestion non pharmacologique de la douleur du nourrisson", "Repérage des signes de maltraitance", "Réduction de l'anxiété péri opératoire de l'enfant", "Accompagnement à l'allaitement en néonatologie", "Éducation thérapeutique de l'enfant asthmatique", "Psychiatrie :", "Désescalade verbale face à l'agitation aiguë", "Repérage et évaluation du risque suicidaire", "Entretien motivationnel dans les addictions", "Réhabilitation psychosociale et pair-aidance"]}, {"code": "C13", "title": "Formaliser des documents professionnels", "description": "Formaliser des documents professionnels dans le cadre d'une démarche scientifique d'amélioration continue des pratiques professionnelles", "explanation": "Cette compétence valorise la capacité de l'infirmier à produire des écrits professionnels de qualité, rapports, articles, synthèses, travaux de fin d'études. Elle ancre la profession infirmière dans une logique universitaire et scientifique, en lien avec l'universitarisation du diplôme.", "progress": {"1ère année": "Élaborer des procédures et des modes opératoires dans le cadre de son activité, à l'aide d'outils appropriés en intégrant les données probantes afin de garantir la qualité des interventions pour une situation simple", "2ème année": "Élaborer des procédures et des modes opératoires dans le cadre de son activité en intégrant les données probantes afin de garantir la qualité des interventions pour une situation complexe", "3ème année": "Élaborer et évaluer des documents professionnels utilisant des données probantes dans le cadre d'une démarche d'amélioration continue des pratiques professionnelles"}, "activities": [{"text": "Participer à la révision d'un protocole existant en y intégrant les dernières recommandations de l’HAS ou les consensus d'experts, en justifiant chaque modification par des preuves scientifiques.", "isNew": false, "isHeading": false}, {"text": "Produire un écrit de stage argumenté : analyse d'une situation clinique, réflexion éthique, étude de cas", "isNew": false, "isHeading": false}, {"text": "Rédiger une analyse de pratique professionnelle (APP) selon les modalités de l'IFSI", "isNew": false, "isHeading": false}], "notes": []}]</script>
+<script>
+const DATA = JSON.parse(document.getElementById('data').textContent);
+
+// ---------- helpers ----------
+function normalize(str){
+  return (str||'')
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[’']/g,"'")
+    .trim();
+}
+
+// flatten all activities with ref to competency
+const ACTIVITIES = [];
+const ACTIVITIES_BY_COMP = DATA.map(() => []);
+DATA.forEach((comp, ci) => {
+  comp.activities.forEach((a, ai) => {
+    if(a.isHeading) return;
+    const item = {
+      compIndex: ci,
+      code: comp.code,
+      title: comp.title,
+      text: a.text,
+      norm: normalize(a.text),
+      isNew: a.isNew
+    };
+    ACTIVITIES.push(item);
+    ACTIVITIES_BY_COMP[ci].push(item);
+  });
+});
+
+// color palette per competency (13 evenly spaced hues, tuned for readability on white text)
+function colorFor(code){
+  const n = parseInt(code.replace('C',''),10);
+  const hue = Math.round(((n-1) * 137.508) % 360); // golden angle distribution
+  return `hsl(${hue} 52% 36%)`;
+}
+
+// French stopwords ignored when tokenizing the query, so connector words
+// ("de", "d'un", "la"...) don't dilute the match.
+const STOPWORDS = new Set(['a','au','aux','avec','ce','ces','cet','cette','d','dans','de','des','du',
+  'elle','elles','en','et','eu','il','ils','ils','l','la','le','les','leur','leurs','lui','ma','mais',
+  'me','mes','mon','ne','nos','notre','nous','on','ou','par','pas','pour','qu','que','qui','sa','se',
+  'ses','son','sur','ta','te','tes','toi','ton','tu','un','une','vos','votre','vous']);
+
+function tokenize(normStr){
+  return normStr.split(/[^a-z0-9]+/).filter(Boolean);
+}
+
+// Crude French "stem": comparing the first 7 letters lets word forms that
+// share a root (prescription / prescrire / prescrit, éducatif / éducation)
+// count as the same idea, without a full lemmatiser. 7 letters is
+// deliberate — verified against the full activity dataset to be the
+// shortest prefix length that stops unrelated words from colliding:
+// "transfusion" vs "transmission"/"transcutané" (diverge at letter 6),
+// and "compression"/"compresses" vs "compréhension"/"comprendre"
+// (diverge at letter 7) both need 7 to stay distinct, while true
+// word-family variants (patient/patients, prescription/prescrire,
+// éducatif/éducation…) still share their first 7 letters.
+function stemOf(w){
+  return w.length >= 7 ? w.slice(0, 7) : w;
+}
+
+// For each compétence, its own title/description, normalised — used to check
+// whether the query itself is literally what that compétence is about
+// (e.g. typing "éducation thérapeutique" should hit the compétence actually
+// named that, even if none of its individual example activities happens to
+// repeat that exact phrase word-for-word).
+const COMP_TITLE_NORM = DATA.map(comp => normalize(comp.title));
+const COMP_DESC_NORM = DATA.map(comp => normalize(comp.title + ' ' + comp.description));
+const COMP_TITLE_STEMS = DATA.map(comp => {
+  const words = tokenize(COMP_TITLE_NORM[DATA.indexOf(comp)] || normalize(comp.title));
+  return new Set(words.filter(w => w.length > 1 && !STOPWORDS.has(w)).map(stemOf));
+});
+const COMP_DESC_STEMS = DATA.map((comp, ci) => {
+  const words = tokenize(COMP_DESC_NORM[ci]);
+  const filtered = words.filter(w => w.length > 1 && !STOPWORDS.has(w));
+  return new Set(filtered.map(stemOf));
+});
+
+// How well does the query match the compétence itself (its name/description),
+// independently of any specific example activity. A hit here — especially one
+// that covers the compétence's own NAME — is the strongest possible signal
+// of which compétence is actually meant, stronger than any coincidental word
+// shared with one unrelated example activity.
+function competencyOwnMatch(compIndex, queryNorm, queryStems){
+  let bonus = 0;
+  if(queryNorm.length > 2 && COMP_TITLE_NORM[compIndex].includes(queryNorm)){
+    bonus += 1600; // the query literally names this compétence
+  } else if(queryNorm.length > 2 && COMP_DESC_NORM[compIndex].includes(queryNorm)){
+    bonus += 700;
+  }
+
+  const titleStems = COMP_TITLE_STEMS[compIndex];
+  const descStems = COMP_DESC_STEMS[compIndex];
+  let allInTitle = queryStems.length > 0;
+  for(const s of queryStems){
+    if(titleStems.has(s)) bonus += 160;
+    else { allInTitle = false; if(descStems.has(s)) bonus += 50; }
+  }
+  // every single query word is part of this compétence's own name: even if
+  // not contiguous ("organiser" ... "soins" in "Organiser les activités de
+  // soins"), that's a very strong match on the compétence's identity.
+  if(allInTitle && queryStems.length > 1) bonus += 500;
+
+  return bonus;
+}
+
+// ---------- search scoring ----------
+// Goal: surface the SINGLE most relevant activity/compétence, not every
+// activity that happens to share one common word.
+function scoreActivity(queryNorm, contentWords, item){
+  if(contentWords.length === 0) return 0;
+  const text = item.norm;
+  let score = 0;
+
+  // strong bonus for the query appearing as a literal phrase
+  if(queryNorm.length > 2 && text.includes(queryNorm)) score += 1000;
+
+  let matched = 0;
+  for(const w of contentWords){
+    const wStem = stemOf(w);
+    // exact word present, OR any word in the text shares its stem (root)
+    let hit = text.includes(w);
+    if(!hit && w.length >= 7){
+      hit = tokenize(text).some(tw => tw.length >= 7 && stemOf(tw) === wStem);
+    }
+    if(hit){
+      matched++;
+      const re = new RegExp('\\b' + escapeRegExp(w));
+      score += re.test(text) ? 9 : 4; // word-boundary match scores higher
+    }
+  }
+  if(matched === 0) return 0;
+
+  const coverage = matched / contentWords.length;
+  score += coverage * 300;                       // reward matching ALL query words
+  score -= (contentWords.length - matched) * 60;  // penalise missing words heavily
+
+  // prefer the more specific (shorter / more targeted) activity on ties
+  score -= text.length * 0.04;
+
+  return score;
+}
+
+function highlight(text, queryWords){
+  if(!queryWords.length) return escapeHtml(text);
+  let html = escapeHtml(text);
+  // sort words by length desc to avoid partial overlap issues
+  const words = [...new Set(queryWords.filter(w=>w.length>1))].sort((a,b)=>b.length-a.length);
+  words.forEach(w=>{
+    const re = new RegExp('(' + escapeRegExp(w) + ')', 'ig');
+    // need accent-insensitive highlight on original text; approximate using normalized compare per word boundary is complex,
+    // fallback: simple case-insensitive plain match on original text (works for most non-accented query words)
+    html = html.replace(re, '<mark>$1</mark>');
+  });
+  return html;
+}
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+
+// ---------- state ----------
+let currentQuery = '';
+
+const mainEl = document.getElementById('main');
+const searchEl = document.getElementById('search');
+const clearBtn = document.getElementById('clearBtn');
+
+// Seules C4 et C8 indiquent explicitement, dans leur progression par année,
+// « Non abordée en 1ère année » — et leur 2ème année reste cantonnée à
+// « identifier » les principes/le cadre réglementaire, sans mise en pratique.
+// Ce sont donc les deux seules compétences non mobilisées en 1ère année,
+// dont les activités de stage ne sont pas menées avant la 3ème année.
+const NOT_BEFORE_3RD_YEAR_CODES = ['C4', 'C8'];
+
+function render(){
+  const q = currentQuery.trim();
+  if(!q){
+    renderBrowse();
+    return;
+  }
+  const qNorm = normalize(q);
+  const allWords = tokenize(qNorm);
+  const contentWords = allWords.filter(w => w.length > 1 && !STOPWORDS.has(w));
+  const effectiveWords = contentWords.length ? contentWords : allWords;
+  const queryStems = effectiveWords.map(stemOf);
+
+  // Score EVERY individual activity, so a term appearing in several
+  // activities (e.g. "sonde") surfaces ALL of them, not just one per
+  // compétence. The compétence's own name/description relevance
+  // (competencyOwnMatch) is added as a per-activity bonus so a query
+  // matching a compétence's title (e.g. "éducation thérapeutique" → C6)
+  // still ranks at the top even if no single activity repeats the phrase.
+  const ownScoreByComp = DATA.map((comp, ci) => competencyOwnMatch(ci, qNorm, queryStems));
+
+  let results = ACTIVITIES.map(item => {
+    const actScore = scoreActivity(qNorm, effectiveWords, item);
+    if(actScore <= 0) return null;
+    const score = actScore + ownScoreByComp[item.compIndex];
+    return {compIndex: item.compIndex, score, item};
+  }).filter(Boolean);
+
+  // If no individual activity matched but a compétence's own name/
+  // description strongly matches the query, still surface that compétence
+  // (fallback, showing its description).
+  if(results.length === 0){
+    DATA.forEach((comp, ci) => {
+      if(ownScoreByComp[ci] > 0){
+        results.push({compIndex: ci, score: ownScoreByComp[ci], item: null});
+      }
+    });
+  }
+
+  results.sort((a,b) => b.score - a.score);
+
+  if(results.length === 0){
+    mainEl.innerHTML = `
+      <div class="empty-state">
+        <div class="big">🔎</div>
+        <div>Aucune activité ne correspond à « ${escapeHtml(q)} ».</div>
+        <div style="margin-top:6px;font-size:.82rem;">Essayez un mot plus général (ex : "pansement", "transmission", "prévention"…)</div>
+      </div>`;
+    return;
+  }
+
+  let html = `<div class="results-count">${results.length > 1 ? results.length + ' activités trouvées' : '1 activité trouvée'}</div>`;
+  results.forEach(r => {
+    const comp = DATA[r.compIndex];
+    const item = r.item;
+    const notBefore3rd = NOT_BEFORE_3RD_YEAR_CODES.includes(comp.code);
+    const bodyText = item
+      ? `${highlight(item.text, effectiveWords)}${item.isNew ? '<span class="tag-new">Nouveau 2026</span>' : ''}${notBefore3rd ? '<span class="tag-year">Pas avant la 3ème année</span>' : ''}`
+      : escapeHtml(comp.description);
+    html += `
+      <div class="card" data-comp="${r.compIndex}">
+        <div class="badge" style="background:${colorFor(comp.code)}">${comp.code}</div>
+        <div class="card-body">
+          <div class="act-text">${bodyText}</div>
+          <div class="comp-title">${comp.code} · ${escapeHtml(comp.title)}</div>
+        </div>
+      </div>`;
+  });
+  mainEl.innerHTML = html;
+  attachCardHandlers();
+}
+
+function renderBrowse(){
+  let html = `<div class="hint">Pas d'idée précise&nbsp;? Parcourez les 13 compétences du référentiel ci-dessous, ou tapez une activité dans la barre de recherche.</div>`;
+  html += `<div class="browse-title">Les 13 compétences</div><div class="grid">`;
+  DATA.forEach((comp, ci) => {
+    const notBefore3rd = NOT_BEFORE_3RD_YEAR_CODES.includes(comp.code);
+    html += `
+      <div class="comp-card" data-comp="${ci}">
+        <div class="badge" style="background:${colorFor(comp.code)}">${comp.code}</div>
+        <div>
+          <div class="ct">${escapeHtml(comp.title)}</div>
+          ${notBefore3rd ? '<span class="tag-year">Non mobilisée en 1ère année</span>' : ''}
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+  mainEl.innerHTML = html;
+  attachCardHandlers();
+}
+
+function attachCardHandlers(){
+  document.querySelectorAll('[data-comp]').forEach(el=>{
+    el.addEventListener('click', () => openDetail(parseInt(el.getAttribute('data-comp'),10)));
+  });
+}
+
+// ---------- detail sheet ----------
+const overlay = document.getElementById('overlay');
+const sheetEl = document.getElementById('sheet');
+
+function openDetail(ci){
+  const comp = DATA[ci];
+  const notBefore3rd = NOT_BEFORE_3RD_YEAR_CODES.includes(comp.code);
+
+  let actHtml = '';
+  comp.activities.forEach(a => {
+    if(a.isHeading){
+      actHtml += `<li class="heading">${escapeHtml(a.text)}</li>`;
+    } else {
+      actHtml += `<li>${escapeHtml(a.text)}${a.isNew ? '<span class="tag-new">Nouveau 2026</span>' : ''}${notBefore3rd ? '<span class="tag-year">Pas avant la 3ème année</span>' : ''}</li>`;
+    }
+  });
+
+  let notesHtml = '';
+  if(comp.notes && comp.notes.length){
+    notesHtml = `<div class="notes">${comp.notes.map(n=>`<p>${escapeHtml(n)}</p>`).join('')}</div>`;
+  }
+
+  sheetEl.innerHTML = `
+    <div class="sheet-head">
+      <div class="badge" style="background:${colorFor(comp.code)}">${comp.code}</div>
+      <h2>${escapeHtml(comp.title)}${notBefore3rd ? '<span class="tag-year">Pas avant la 3ème année</span>' : ''}</h2>
+      <button class="close-x" id="closeSheet" aria-label="Fermer">✕</button>
+    </div>
+    <div class="desc">${escapeHtml(comp.description)}</div>
+    ${comp.explanation ? `<div class="explain"><b>Ce que ça veut dire</b>${escapeHtml(comp.explanation)}</div>` : ''}
+    <h3>Exemples d'activités de stage</h3>
+    <ul class="act-list">${actHtml}</ul>
+    ${notesHtml}
+  `;
+
+  document.getElementById('closeSheet').addEventListener('click', closeDetail);
+
+  overlay.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail(){
+  overlay.classList.remove('show');
+  document.body.style.overflow = '';
+}
+overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeDetail(); });
+document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeDetail(); });
+
+// ---------- events ----------
+searchEl.addEventListener('input', ()=>{
+  currentQuery = searchEl.value;
+  clearBtn.classList.toggle('show', currentQuery.length > 0);
+  render();
+});
+clearBtn.addEventListener('click', ()=>{
+  searchEl.value = '';
+  currentQuery = '';
+  clearBtn.classList.remove('show');
+  searchEl.focus();
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
