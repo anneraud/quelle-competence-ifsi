@@ -70,6 +70,12 @@
     font-size:.86rem;
     color:#d3ece7;
   }
+  header.top .credit{
+    margin:4px 0 0;
+    font-size:.68rem;
+    color:rgba(255,255,255,.55);
+    letter-spacing:.01em;
+  }
 
   .search-box{
     position:relative;
@@ -188,6 +194,60 @@
     margin-left:6px;
     vertical-align:middle;
   }
+  .filter-bar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:16px 0 6px;
+    padding:10px 14px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    cursor:pointer;
+    user-select:none;
+    width:fit-content;
+    max-width:100%;
+  }
+  .filter-bar input{
+    position:absolute;
+    opacity:0;
+    width:1px;
+    height:1px;
+  }
+  .filter-bar .switch{
+    flex:0 0 auto;
+    width:38px;
+    height:22px;
+    border-radius:11px;
+    background:#d7dde2;
+    position:relative;
+    transition:background .15s ease;
+  }
+  .filter-bar .switch::before{
+    content:"";
+    position:absolute;
+    top:2px; left:2px;
+    width:18px; height:18px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 1px 2px rgba(0,0,0,.25);
+    transition:transform .15s ease;
+  }
+  .filter-bar input:checked + .switch{
+    background:var(--new-ink);
+  }
+  .filter-bar input:checked + .switch::before{
+    transform:translateX(16px);
+  }
+  .filter-bar input:focus-visible + .switch{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+  .filter-bar .filter-label{
+    font-size:.86rem;
+    color:var(--ink);
+    font-weight:600;
+  }
   .tag-year{
     display:inline-block;
     background:#fde4e1;
@@ -291,8 +351,28 @@
     background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:18px;min-height:20px;
   }
 
-  .sheet h3{font-size:.82rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);margin:0 0 8px;}
+  .sheet h3{font-size:.82rem;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);margin:0;}
+  .sheet-act-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:0 0 8px;
+  }
+  .filter-bar-sheet{
+    margin:0;
+    padding:6px 10px;
+    border-color:var(--line);
+  }
+  .filter-bar-sheet .filter-label{font-size:.76rem;font-weight:600;}
+  .filter-bar-sheet .switch{width:32px;height:18px;}
+  .filter-bar-sheet .switch::before{width:14px;height:14px;}
+  .filter-bar-sheet input:checked + .switch::before{transform:translateX(14px);}
   .act-list{list-style:none;margin:0 0 6px;padding:0;}
+  .act-list li.empty-note{
+    font-size:.86rem;color:var(--ink-soft);font-style:italic;padding:10px 0;
+  }
   .act-list li{
     font-size:.92rem;line-height:1.42;
     padding:8px 0;
@@ -323,6 +403,7 @@
       <div>
         <h1>Quelle compétence je mobilise&nbsp;?</h1>
         <p>Tapez l'activité que vous réalisez en stage — Référentiel de formation infirmier 2026 (13 compétences)</p>
+        <p class="credit">Conception : Anne RAUD — Coordinatrice des stages — IFSI — Centre Hospitalier Cholet</p>
       </div>
     </div>
     <div class="search-box">
@@ -620,18 +701,33 @@ function attachCardHandlers(){
 const overlay = document.getElementById('overlay');
 const sheetEl = document.getElementById('sheet');
 
+// Builds just the <li> items for one compétence's activity list — shared by
+// the initial render and by the "Nouveau 2026 uniquement" toggle inside the
+// detail sheet, so toggling never has to rebuild the whole sheet.
+function buildActListHtml(comp, notBefore3rd, onlyNew){
+  let items = comp.activities;
+  if(onlyNew){
+    items = items.filter(a => !a.isHeading && a.isNew);
+  }
+  if(items.length === 0){
+    return `<li class="empty-note">Aucune nouvelle activité (référentiel 2026) pour cette compétence.</li>`;
+  }
+  let html = '';
+  items.forEach(a => {
+    if(a.isHeading){
+      html += `<li class="heading">${escapeHtml(a.text)}</li>`;
+    } else {
+      html += `<li>${escapeHtml(a.text)}${a.isNew ? '<span class="tag-new">Nouveau 2026</span>' : ''}${notBefore3rd ? '<span class="tag-year">Pas avant la 3ème année</span>' : ''}</li>`;
+    }
+  });
+  return html;
+}
+
 function openDetail(ci){
   const comp = DATA[ci];
   const notBefore3rd = NOT_BEFORE_3RD_YEAR_CODES.includes(comp.code);
-
-  let actHtml = '';
-  comp.activities.forEach(a => {
-    if(a.isHeading){
-      actHtml += `<li class="heading">${escapeHtml(a.text)}</li>`;
-    } else {
-      actHtml += `<li>${escapeHtml(a.text)}${a.isNew ? '<span class="tag-new">Nouveau 2026</span>' : ''}${notBefore3rd ? '<span class="tag-year">Pas avant la 3ème année</span>' : ''}</li>`;
-    }
-  });
+  const hasNew = comp.activities.some(a => !a.isHeading && a.isNew);
+  let sheetOnlyNew = false; // reset every time a compétence is opened
 
   let notesHtml = '';
   if(comp.notes && comp.notes.length){
@@ -646,12 +742,27 @@ function openDetail(ci){
     </div>
     <div class="desc">${escapeHtml(comp.description)}</div>
     ${comp.explanation ? `<div class="explain"><b>Ce que ça veut dire</b>${escapeHtml(comp.explanation)}</div>` : ''}
-    <h3>Exemples d'activités de stage</h3>
-    <ul class="act-list">${actHtml}</ul>
+    <div class="sheet-act-head">
+      <h3>Exemples d'activités de stage</h3>
+      ${hasNew ? `
+        <label class="filter-bar filter-bar-sheet" for="sheetOnlyNewToggle">
+          <input type="checkbox" id="sheetOnlyNewToggle">
+          <span class="switch" aria-hidden="true"></span>
+          <span class="filter-label">Nouveau 2026 uniquement</span>
+        </label>` : ''}
+    </div>
+    <ul class="act-list" id="sheetActList">${buildActListHtml(comp, notBefore3rd, sheetOnlyNew)}</ul>
     ${notesHtml}
   `;
 
   document.getElementById('closeSheet').addEventListener('click', closeDetail);
+
+  if(hasNew){
+    document.getElementById('sheetOnlyNewToggle').addEventListener('change', (e) => {
+      sheetOnlyNew = e.target.checked;
+      document.getElementById('sheetActList').innerHTML = buildActListHtml(comp, notBefore3rd, sheetOnlyNew);
+    });
+  }
 
   overlay.classList.add('show');
   document.body.style.overflow = 'hidden';
